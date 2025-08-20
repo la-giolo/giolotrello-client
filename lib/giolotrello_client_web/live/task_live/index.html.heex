@@ -1,0 +1,11 @@
+<div class="p-6">
+  <h1 class="text-2xl font-bold mb-4">Tasks</h1>
+
+  <ul class="space-y-2">
+    <%= for task <- @tasks do %>
+      <li class="p-3 rounded border">
+        <%= task["title"] %>
+      </li>
+    <% end %>
+  </ul>
+</div>
