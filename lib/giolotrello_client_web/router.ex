@@ -10,8 +10,8 @@ defmodule GiolotrelloClientWeb.Router do
     plug :put_secure_browser_headers
   end
 
-  pipeline :auth do
-    plug :require_authenticated_user
+  pipeline :require_authenticated_user do
+    plug GiolotrelloClientWeb.Plugs.Auth
   end
 
   pipeline :api do
@@ -28,21 +28,11 @@ defmodule GiolotrelloClientWeb.Router do
 
   # Protected routes
   scope "/", GiolotrelloClientWeb do
-    pipe_through [:browser]
+    pipe_through [:browser, :require_authenticated_user]
 
-    get "/", PageController, :home
+    live "/", HomeLive.Index
 
     live "/tasks", TaskLive.Index
-  end
-
-  defp require_authenticated_user(conn, _opts) do
-    if get_session(conn, :auth_token) do
-      conn
-    else
-      conn
-      |> Phoenix.Controller.redirect(to: "/login")
-      |> halt()
-    end
   end
 
   # Other scopes may use custom stacks.
