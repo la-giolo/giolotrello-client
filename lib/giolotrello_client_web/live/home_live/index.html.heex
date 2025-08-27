@@ -1,4 +1,4 @@
-<h1 class="text-2xl font-bold mb-4">Your Boards</h1>
+<h1 class="text-2xl font-bold mb-4">GioloTrello</h1>
 
 <div class="flex space-x-4 overflow-x-auto">
   <%= for list <- @lists do %>
@@ -7,7 +7,13 @@
 
       <ul class="space-y-2">
         <%= for task <- list["tasks"] do %>
-          <li class="bg-white rounded p-2 shadow-sm">
+          <li
+            class="bg-white rounded p-2 shadow-sm cursor-pointer hover:bg-gray-50"
+            phx-click="show_task"
+            phx-value-id={task["id"]}
+            phx-value-title={task["title"]}
+            phx-value-description={task["description"]}
+          >
             <strong><%= task["title"] %></strong><br />
             <span class="text-sm text-gray-600"><%= task["description"] %></span>
           </li>
@@ -16,3 +22,34 @@
     </div>
   <% end %>
 </div>
+
+<%= if @selected_task do %>
+  <!-- Overlay -->
+  <div class="fixed inset-0 z-40">
+    <div class="absolute inset-0 bg-black opacity-50"></div>
+  </div>
+
+  <!-- Modal content -->
+  <div class="fixed inset-0 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-96 relative">
+      <button
+        class="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+        phx-click="close_task"
+      >
+        ✕
+      </button>
+
+      <h2 class="text-xl font-bold mb-4"><%= @selected_task["title"] %></h2>
+      <p class="text-gray-700 mb-4"><%= @selected_task["description"] %></p>
+
+      <div class="flex space-x-2">
+        <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          Edit
+        </button>
+        <button class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+<% end %>

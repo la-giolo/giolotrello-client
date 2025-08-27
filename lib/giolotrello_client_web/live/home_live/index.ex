@@ -7,11 +7,34 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
 
     socket =
       case fetch_lists(token) do
-        {:ok, lists} -> assign(socket, :lists, lists)
-        {:error, _} -> assign(socket, :lists, [])
+        {:ok, lists} ->
+          socket
+          |> assign(:lists, lists)
+          |> assign(:selected_task, nil)
+          |> assign(:auth_token, token)
+        {:error, _} ->
+          socket
+          |> assign(:lists, [])
+          |> assign(:selected_task, nil)
+          |> assign(:auth_token, token)
       end
 
     {:ok, socket}
+  end
+
+  @impl true
+  def handle_event("show_task", %{"id" => id}, socket) do
+    task =
+      socket.assigns.lists
+      |> Enum.flat_map(& &1["tasks"])
+      |> Enum.find(fn t -> to_string(t["id"]) == id end)
+
+    {:noreply, assign(socket, :selected_task, task)}
+  end
+
+  @impl true
+  def handle_event("close_task", _params, socket) do
+    {:noreply, assign(socket, :selected_task, nil)}
   end
 
   defp fetch_lists(nil), do: {:error, :no_token}

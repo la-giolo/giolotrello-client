@@ -30,15 +30,10 @@ defmodule GiolotrelloClientWeb.Router do
   scope "/", GiolotrelloClientWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-    live "/", HomeLive.Index
+    live "/home", HomeLive.Index
 
     live "/tasks", TaskLive.Index
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", GiolotrelloClientWeb do
-  #   pipe_through :api
-  # end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:giolotrello_client, :dev_routes) do
