@@ -1,0 +1,21 @@
+<h2>Login</h2>
+
+<.form :let={f} for={} action={~p"/login"} method="post">
+  <div>
+    <label>Email</label>
+    <.input field={f[:email]} type="email" required />
+  </div>
+
+  <div>
+    <label>Password</label>
+    <.input field={f[:password]} type="password" required />
+  </div>
+
+  <div>
+    <.button>Login</.button>
+  </div>
+</.form>
+
+<%= if @conn.assigns[:phoenix_flash]["error"] do %>
+  <p style="color:red"><%= @conn.assigns.phoenix_flash["error"] %></p>
+<% end %>

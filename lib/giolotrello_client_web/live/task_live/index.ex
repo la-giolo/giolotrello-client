@@ -2,18 +2,20 @@ defmodule GiolotrelloClientWeb.TaskLive.Index do
   use GiolotrelloClientWeb, :live_view
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, fetch_tasks(socket)}
+  def mount(_params, session, socket) do
+    token = session["auth_token"]
+    {:ok, fetch_tasks(socket, token)}
   end
 
-  defp fetch_tasks(socket) do
-    # Call API using HTTP client (Finch or HTTPoison)
-    case Req.get!("http://giolotrello-api:4000/api/tasks") do
-      %Req.Response{status: 200, body: %{"data" => tasks}} ->
-        assign(socket, :tasks, tasks)
+  defp fetch_tasks(socket, token) do
+    case Req.get("http://giolotrello-api:4000/api/tasks",
+         headers: [{"authorization", "Bearer " <> token}]
+       ) do
+    {:ok, %Req.Response{status: 200, body: %{"data" => tasks}}} ->
+      assign(socket, :tasks, tasks)
 
-      _ ->
-        assign(socket, :tasks, [])
-    end
+    _ ->
+      assign(socket, :tasks, [])
+  end
   end
 end
