@@ -15,8 +15,15 @@ ENV REBAR_GLOBAL_HEX_OPTS="--ipv4"
 ENV HEX_HTTP_CONCURRENCY=1
 
 WORKDIR /app
+
 COPY mix.exs mix.lock config ./
 RUN mix local.hex --force && mix local.rebar --force && mix deps.get
 
 COPY . .
+
+WORKDIR /app/assets
+RUN npm install
+
+WORKDIR /app
+
 CMD ["sh", "-c", "mix deps.get && mix phx.server"]

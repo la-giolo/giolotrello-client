@@ -1,0 +1,7 @@
+{
+  "name": "giolotrello_client",
+  "version": "0.1.0",
+  "dependencies": {
+    "sortablejs": "^1.15.6"
+  }
+}

@@ -1,18 +1,22 @@
-<h1 class="text-2xl font-bold mb-4">GioloTrello</h1>
+<div class="min-h-screen bg-blue-200">
+  <h1 class="text-3xl font-bold mb-6 px-4 py-2 bg-blue-500 text-white rounded">
+    Giolotrello
+  </h1>
 
-<div class="flex space-x-4 overflow-x-auto">
-  <%= for list <- @lists do %>
-    <.task_list list={list} />
+  <div class="flex space-x-4 overflow-x-auto px-4">
+    <%= for list <- @lists do %>
+      <.task_list list={list} />
+    <% end %>
+  </div>
+
+  <%= if @selected_task do %>
+    <.live_component
+      module={GiolotrelloClientWeb.TaskModalComponent}
+      id={@selected_task["id"]}
+      list_id={@selected_task["list_id"]}
+      task={@selected_task}
+      creating_task={@creating_task || false}
+      editing_task={@editing_task || false}
+    />
   <% end %>
 </div>
-
-<%= if @selected_task do %>
-  <.live_component
-    module={GiolotrelloClientWeb.TaskModalComponent}
-    id={@selected_task["id"]}
-    list_id={@selected_task["list_id"]}
-    task={@selected_task}
-    creating_task={@creating_task || false}
-    editing_task={@editing_task || false}
-  />
-<% end %>

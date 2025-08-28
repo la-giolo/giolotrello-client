@@ -7,7 +7,7 @@ defmodule GiolotrelloClientWeb.TaskListComponent do
     ~H"""
     <div class="bg-gray-100 rounded-lg p-4 w-64 shadow">
       <h2 class="font-semibold text-lg mb-2"><%= @list["title"] %></h2>
-      <ul class="space-y-2">
+      <ul class="space-y-2" id="task" phx-hook="SortableTasks">
         <%= for task <- @list["tasks"] do %>
           <.task_card task={task} />
         <% end %>
