@@ -64,6 +64,16 @@ defmodule GiolotrelloClientWeb do
     end
   end
 
+  def component do
+    quote do
+      use Phoenix.Component
+
+      import GiolotrelloClientWeb.CoreComponents
+      import GiolotrelloClientWeb.Gettext
+      alias Phoenix.LiveView.JS
+    end
+  end
+
   def html do
     quote do
       use Phoenix.Component

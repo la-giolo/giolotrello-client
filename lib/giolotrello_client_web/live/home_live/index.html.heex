@@ -2,115 +2,15 @@
 
 <div class="flex space-x-4 overflow-x-auto">
   <%= for list <- @lists do %>
-    <div class="bg-gray-100 rounded-lg p-4 w-64 shadow">
-      <h2 class="font-semibold text-lg mb-2"><%= list["title"] %></h2>
-
-      <ul class="space-y-2">
-        <%= for task <- list["tasks"] do %>
-          <li
-            class="bg-white rounded p-2 shadow-sm cursor-pointer hover:bg-gray-50"
-            phx-click="show_task"
-            phx-value-id={task["id"]}
-            phx-value-title={task["title"]}
-            phx-value-description={task["description"]}
-          >
-            <strong><%= task["title"] %></strong><br />
-            <span class="text-sm text-gray-600"><%= task["description"] %></span>
-          </li>
-        <% end %>
-      </ul>
-    </div>
+    <.task_list list={list} />
   <% end %>
 </div>
 
-<%= if @editing_task do %>
-  <!-- Overlay -->
-  <div class="fixed inset-0 z-40">
-    <div class="absolute inset-0 bg-black opacity-25"></div>
-  </div>
-
-  <!-- Modal content -->
-  <div class="fixed inset-0 flex items-center justify-center z-50">
-    <form phx-submit="update_task" class="bg-white rounded-lg shadow-lg p-6 w-96 relative">
-      <!-- Hidden input for task ID -->
-      <input type="hidden" name="task_id" value={@selected_task["id"]} />
-
-      <!-- Close button -->
-      <button
-        type="button"
-        class="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-        phx-click="cancel_edit"
-      >
-        ✕
-      </button>
-
-      <h2 class="text-xl font-bold mb-4">Edit Task</h2>
-
-      <input
-        type="text"
-        name="title"
-        value={@selected_task["title"]}
-        class="border rounded p-1 w-full mb-2"
-      />
-
-      <textarea
-        name="description"
-        class="border rounded p-1 w-full mb-2"
-      ><%= @selected_task["description"] %></textarea>
-
-      <div class="flex space-x-2">
-        <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-          Save
-        </button>
-        <button
-          type="button"
-          class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
-          phx-click="cancel_edit"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
-  </div>
-<% else %>
-  <%= if @selected_task do %>
-    <!-- Overlay -->
-    <div class="fixed inset-0 z-40">
-      <div class="absolute inset-0 bg-black opacity-50"></div>
-    </div>
-
-    <!-- Modal content -->
-    <div class="fixed inset-0 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg shadow-lg p-6 w-96 relative">
-        <button
-          class="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-          phx-click="close_task"
-        >
-          ✕
-        </button>
-
-        <h2 class="text-xl font-bold mb-4"><%= @selected_task["title"] %></h2>
-        <p class="text-gray-700 mb-4"><%= @selected_task["description"] %></p>
-
-        <div class="flex space-x-2">
-          <button
-            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            phx-click="edit_task"
-            phx-value-id={@selected_task["id"]}
-          >
-            Edit
-          </button>
-          <button
-            class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-            phx-click="delete_task"
-            phx-value-id={@selected_task["id"]}
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  <% end %>
+<%= if @selected_task do %>
+  <.live_component
+    module={GiolotrelloClientWeb.TaskModalComponent}
+    id={@selected_task["id"]}
+    task={@selected_task}
+    editing_task={@editing_task || false}
+  />
 <% end %>
-
-

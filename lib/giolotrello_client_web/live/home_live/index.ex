@@ -1,6 +1,8 @@
 defmodule GiolotrelloClientWeb.HomeLive.Index do
   use GiolotrelloClientWeb, :live_view
 
+  import GiolotrelloClientWeb.TaskListComponent
+
   @impl true
   def mount(_params, session, socket) do
     token = session["auth_token"]
