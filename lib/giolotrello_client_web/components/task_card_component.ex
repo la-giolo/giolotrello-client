@@ -9,6 +9,7 @@ defmodule GiolotrelloClientWeb.TaskCardComponent do
       phx-value-id={@task["id"]}
       phx-value-title={@task["title"]}
       phx-value-description={@task["description"]}
+      phx-value-list-id={@task["id"]}
     >
       <strong><%= @task["title"] %></strong><br />
       <span class="text-sm text-gray-600"><%= @task["description"] %></span>

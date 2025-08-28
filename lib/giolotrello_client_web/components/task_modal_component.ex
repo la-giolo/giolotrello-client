@@ -2,6 +2,17 @@ defmodule GiolotrelloClientWeb.TaskModalComponent do
   use GiolotrelloClientWeb, :live_component
 
   @impl true
+  def update(assigns, socket) do
+    socket =
+      socket
+      |> assign_new(:creating_task, fn -> false end)
+      |> assign_new(:editing_task, fn -> false end)
+      |> assign(assigns)
+
+    {:ok, socket}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="fixed inset-0 bg-gray-100 bg-opacity-50 flex items-center justify-center z-50">
@@ -13,36 +24,45 @@ defmodule GiolotrelloClientWeb.TaskModalComponent do
           ✕
         </button>
 
-        <%= if @editing_task do %>
-          <form phx-submit="update_task">
-            <input type="hidden" name="task_id" value={@task["id"]} />
-            <input type="text" name="title" value={@task["title"]} class="border rounded p-1 w-full mb-2" />
-            <textarea name="description" class="border rounded p-1 w-full mb-2"><%= @task["description"] %></textarea>
+        <%= case {@creating_task, @editing_task} do %>
+          <% {true, _} -> %>
+            <form phx-submit="create_task">
+              <input type="hidden" name="list_id" value={@list_id} />
+              <input type="text" name="title" placeholder="Task title" />
+              <textarea name="description" placeholder="Description"></textarea>
+              <button type="submit">Save</button>
+              <button type="button" phx-click="cancel_create">Cancel</button>
+            </form>
+          <% {_, true} -> %>
+            <form phx-submit="update_task">
+              <input type="hidden" name="task_id" value={@task["id"]} />
+              <input type="text" name="title" value={@task["title"]} class="border rounded p-1 w-full mb-2" />
+              <textarea name="description" class="border rounded p-1 w-full mb-2"><%= @task["description"] %></textarea>
 
+              <div class="flex space-x-2">
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>
+                <button type="button" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" phx-click="cancel_edit">Cancel</button>
+              </div>
+            </form>
+          <% _ -> %>
+            <h2 class="text-xl font-bold mb-4"><%= @task["title"] %></h2>
+            <p class="text-gray-700 mb-4"><%= @task["description"] %></p>
             <div class="flex space-x-2">
-              <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>
-              <button type="button" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" phx-click="cancel_edit">Cancel</button>
+              <button
+                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                phx-click="edit_task"
+                phx-value-id={@task["id"]}
+              >
+                Edit
+              </button>
+              <button
+                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                phx-click="delete_task"
+                phx-value-id={@task["id"]}
+              >
+                Delete
+              </button>
             </div>
-          </form>
-        <% else %>
-          <h2 class="text-xl font-bold mb-4"><%= @task["title"] %></h2>
-          <p class="text-gray-700 mb-4"><%= @task["description"] %></p>
-          <div class="flex space-x-2">
-            <button
-              class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              phx-click="edit_task"
-              phx-value-id={@task["id"]}
-            >
-              Edit
-            </button>
-            <button
-              class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-              phx-click="delete_task"
-              phx-value-id={@task["id"]}
-            >
-              Delete
-            </button>
-          </div>
         <% end %>
       </div>
     </div>

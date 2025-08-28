@@ -17,6 +17,7 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
       socket
       |> assign(:lists, lists)
       |> assign(:selected_task, nil)
+      |> assign(:creating_task, false)
       |> assign(:editing_task, false)
       |> assign(:auth_token, token)
 
@@ -37,6 +38,55 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
   def handle_event("close_task", _params, socket) do
     {:noreply, assign(socket, :selected_task, nil)}
   end
+
+  def handle_event("new_task", %{"list_id" => list_id}, socket) do
+    {:noreply,
+    socket
+    |> assign(:creating_task, true)
+    |> assign(:editing_task, false)
+    |> assign(:selected_task, %{
+          "id" => "new-#{list_id}",
+          "list_id" => list_id,
+          "title" => "",
+          "description" => ""
+        })}
+  end
+
+  @impl true
+  def handle_event("cancel_create", _params, socket) do
+    {:noreply, assign(socket, :creating_task, false)}
+  end
+
+  @impl true
+  def handle_event("create_task", %{"title" => title, "description" => description, "list_id" => list_id}, socket) do
+    token = socket.assigns[:auth_token]
+
+    case Req.post("http://giolotrello-api:4000/api/tasks",
+          json: %{
+            "task" => %{
+              "title" => title,
+              "description" => description,
+              "list_id" => list_id
+            }
+          },
+          headers: [{"authorization", "Bearer " <> token}]
+        ) do
+      {:ok, %{status: 201, body: task}} ->
+        {:noreply,
+        socket
+        |> assign(:tasks, [task | socket.assigns.tasks])
+        |> assign(:creating_task, false)}
+
+      {:ok, %{status: status, body: body}} ->
+        {status, body}
+        {:noreply, socket}
+
+      {:error, reason} ->
+        reason
+        {:noreply, socket}
+    end
+  end
+
 
   @impl true
   def handle_event("delete_task", %{"id" => id}, socket) do
@@ -103,8 +153,6 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
               list
             end
           end)
-
-        IO.inspect(updated_lists, label: "GIOLO WAS HERE")
 
         {:noreply,
         socket

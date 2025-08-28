@@ -10,7 +10,9 @@
   <.live_component
     module={GiolotrelloClientWeb.TaskModalComponent}
     id={@selected_task["id"]}
+    list_id={@selected_task["list_id"]}
     task={@selected_task}
+    creating_task={@creating_task || false}
     editing_task={@editing_task || false}
   />
 <% end %>

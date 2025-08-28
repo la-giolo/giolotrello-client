@@ -12,6 +12,14 @@ defmodule GiolotrelloClientWeb.TaskListComponent do
           <.task_card task={task} />
         <% end %>
       </ul>
+
+      <button
+        class="text-blue-600 hover:underline text-sm"
+        phx-click="new_task"
+        phx-value-list_id={@list["id"]}
+      >
+        + Add Task
+      </button>
     </div>
     """
   end
