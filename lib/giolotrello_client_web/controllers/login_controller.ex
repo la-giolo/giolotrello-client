@@ -13,7 +13,7 @@ defmodule GiolotrelloClientWeb.LoginController do
         conn
         |> put_session(:auth_token, token)
         |> put_flash(:info, "Login successful!")
-        |> redirect(to: ~p"/tasks")
+        |> redirect(to: ~p"/home")
 
       {:ok, %Req.Response{status: status, body: body}} ->
         conn

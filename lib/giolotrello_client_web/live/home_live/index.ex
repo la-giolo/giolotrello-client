@@ -68,6 +68,7 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
               "description" => description,
               "list_id" => list_id
             }
+
           },
           headers: [{"authorization", "Bearer " <> token}]
         ) do
@@ -78,12 +79,10 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
         |> assign(:creating_task, false)}
 
       {:ok, %{status: status, body: body}} ->
-        {status, body}
-        {:noreply, socket}
+        {:noreply, put_flash(socket, :error, "Create failed (#{status}): #{inspect(body)}")}
 
       {:error, reason} ->
-        reason
-        {:noreply, socket}
+        {:noreply, put_flash(socket, :error, "Create task error: #{inspect(reason)}")}
     end
   end
 

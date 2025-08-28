@@ -30,9 +30,8 @@ defmodule GiolotrelloClientWeb.Router do
   scope "/", GiolotrelloClientWeb do
     pipe_through [:browser, :require_authenticated_user]
 
+    live "/", HomeLive.Index
     live "/home", HomeLive.Index
-
-    live "/tasks", TaskLive.Index
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

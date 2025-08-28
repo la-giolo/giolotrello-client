@@ -2,7 +2,7 @@ defmodule GiolotrelloClientWeb.Plugs.Auth do
   import Plug.Conn
   import Phoenix.Controller
 
-  alias GiolotrelloClientWeb.Router, as: Routes
+  use GiolotrelloClientWeb, :verified_routes
 
   def init(default), do: default
 
@@ -12,7 +12,7 @@ defmodule GiolotrelloClientWeb.Plugs.Auth do
     else
       conn
       |> put_flash(:error, "You must log in to access this page.")
-      |> redirect(to: Routes.login_path(conn, :new))
+      |> redirect(to: ~p"/login")
       |> halt()
     end
   end
