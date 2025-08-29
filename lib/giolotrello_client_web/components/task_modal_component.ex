@@ -16,9 +16,12 @@ defmodule GiolotrelloClientWeb.TaskModalComponent do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="fixed inset-0 bg-gray-100 bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg shadow-lg p-6 w-[700px] relative flex">
+    <div class="fixed inset-0 z-50 flex items-center justify-center">
+      <!-- Backdrop -->
+      <div class="absolute inset-0 bg-black/50" phx-click="close_task"></div>
 
+      <!-- Modal content -->
+      <div class="relative bg-white rounded-lg shadow-lg p-6 w-[700px] flex">
         <!-- Left side: task details -->
         <div class="flex-1 pr-6">
           <button
