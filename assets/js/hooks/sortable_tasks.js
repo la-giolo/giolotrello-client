@@ -1,15 +1,27 @@
-import Sortable from "sortablejs";
+import Sortable from "sortablejs"
 
 let SortableTasks = {
   mounted() {
-    Sortable.create(this.el, {
+    this.sortable = new Sortable(this.el, {
       animation: 150,
       onEnd: (evt) => {
-        let ids = Array.from(this.el.children).map(el => el.dataset.id);
-        this.pushEvent("reorder_tasks", { ids: ids });
-      }
-    });
-  }
-};
+        let taskId = evt.item.dataset.id
+        let afterTask = evt.item.previousElementSibling
+          ? evt.item.previousElementSibling.dataset.id
+          : null
 
-export default SortableTasks;
+        this.pushEvent("reorder_task", {
+          task_id: taskId,
+          after_task_id: afterTask
+        })
+      },
+    })
+  },
+  destroyed() {
+    if (this.sortable) {
+      this.sortable.destroy()
+    }
+  }
+}
+
+export default SortableTasks

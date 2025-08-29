@@ -167,6 +167,44 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
     end
   end
 
+  @impl true
+  def handle_event("reorder_task", %{"task_id" => task_id, "after_task_id" => after_task_id}, socket) do
+    token = socket.assigns[:auth_token]
+
+    case Req.put("http://giolotrello-api:4000/api/tasks/#{task_id}",
+          json: %{
+            "task" => %{
+              "after_task_id" => after_task_id
+            }
+          },
+          headers: [{"authorization", "Bearer " <> token}]
+        ) do
+      {:ok, %Req.Response{status: 200, body: updated_task}} ->
+        updated_lists =
+          Enum.map(socket.assigns.lists, fn list ->
+            if list["id"] == updated_task["list_id"] do
+              Map.update!(list, "tasks", fn tasks ->
+                Enum.map(tasks, fn t ->
+                  if t["id"] == updated_task["id"], do: updated_task, else: t
+                end)
+              end)
+            else
+              list
+            end
+          end)
+
+        {:noreply,
+        socket
+        |> assign(:lists, updated_lists)}
+
+      {:ok, %Req.Response{status: status, body: body}} ->
+        {:noreply, put_flash(socket, :error, "Reorder failed (#{status}): #{inspect(body)}")}
+
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :error, "Reorder error: #{inspect(reason)}")}
+    end
+  end
+
   defp fetch_lists(nil), do: {:error, :no_token}
 
   defp fetch_lists(token) do

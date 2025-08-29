@@ -5,6 +5,7 @@ defmodule GiolotrelloClientWeb.TaskCardComponent do
     ~H"""
     <li
       class="bg-white rounded p-2 shadow-sm cursor-pointer hover:bg-gray-50"
+      data-id={@task["id"]}
       phx-click="show_task"
       phx-value-id={@task["id"]}
       phx-value-title={@task["title"]}
