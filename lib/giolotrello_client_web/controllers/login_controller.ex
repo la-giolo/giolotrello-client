@@ -26,4 +26,11 @@ defmodule GiolotrelloClientWeb.LoginController do
         |> render(:new, layout: false)
     end
   end
+
+  def delete(conn, _params) do
+    conn
+    |> delete_session(:auth_token)
+    |> put_flash(:info, "Logged out successfully!")
+    |> redirect(to: ~p"/login")
+  end
 end

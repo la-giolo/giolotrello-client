@@ -24,6 +24,7 @@ defmodule GiolotrelloClientWeb.Router do
 
     get  "/login", LoginController, :new
     post "/login", LoginController, :create
+    get "/logout", LoginController, :delete
   end
 
   # Protected routes
