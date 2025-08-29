@@ -205,6 +205,50 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
     end
   end
 
+  @impl true
+  def handle_event("add_comment", %{"task_id" => task_id, "body" => body}, socket) do
+    token = socket.assigns[:auth_token]
+    task_id_int = String.to_integer(task_id)
+
+    case Req.post("http://giolotrello-api:4000/api/tasks/#{task_id}/comments",
+          json: %{"comment" => %{"body" => body}},
+          headers: [{"authorization", "Bearer " <> token}]
+        ) do
+      {:ok, %Req.Response{status: 201, body: %{"data" => new_comment}}} ->
+        updated_lists =
+          Enum.map(socket.assigns.lists, fn list ->
+            updated_tasks =
+              Enum.map(list["tasks"], fn task ->
+                if task["id"] == task_id_int do
+                  Map.update(task, "comments", [new_comment], fn comments -> comments ++ [new_comment] end)
+                else
+                  task
+                end
+              end)
+
+            Map.put(list, "tasks", updated_tasks)
+          end)
+
+        updated_selected_task =
+          if socket.assigns.selected_task && socket.assigns.selected_task["id"] == task_id_int do
+            Map.update(socket.assigns.selected_task, "comments", [new_comment], fn comments -> comments ++ [new_comment] end)
+          else
+            socket.assigns.selected_task
+          end
+
+        {:noreply,
+        socket
+        |> assign(:lists, updated_lists)
+        |> assign(:selected_task, updated_selected_task)}
+
+      {:ok, %Req.Response{status: status, body: body}} ->
+        {:noreply, put_flash(socket, :error, "Add comment failed (#{status}): #{inspect(body)}")}
+
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :error, "Add comment error: #{inspect(reason)}")}
+    end
+  end
+
   defp fetch_lists(nil), do: {:error, :no_token}
 
   defp fetch_lists(token) do
