@@ -20,6 +20,7 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
       |> assign(:creating_task, false)
       |> assign(:editing_task, false)
       |> assign(:creating_list, false)
+      |> assign(:new_list_title, "")
       |> assign(:auth_token, token)
 
     {:ok, socket}
@@ -31,8 +32,35 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
   end
 
   @impl true
-  def handle_event("cancel_create_list", _params, socket) do
-    {:noreply, assign(socket, :creating_list, false)}
+  def handle_event("cancel_new_list", _params, socket) do
+    {:noreply, assign(socket, creating_list: false, new_list_title: "")}
+  end
+
+  @impl true
+  def handle_event("create_list", %{"title" => title}, socket) do
+    token = socket.assigns[:auth_token]
+
+    case Req.post("http://giolotrello-api:4000/api/lists",
+          json: %{
+            "list" => %{
+              "title" => title
+            }
+          },
+          headers: [{"authorization", "Bearer " <> token}]
+        ) do
+      {:ok, %{status: 201, body: %{"data" => list}}} ->
+        {:noreply,
+        socket
+        |> update(:lists, fn lists -> lists ++ [list] end)
+        |> assign(:creating_list, false)
+        |> put_flash(:info, "List created successfully")}
+
+      {:ok, %{status: status, body: body}} ->
+        {:noreply, put_flash(socket, :error, "Create failed (#{status}): #{inspect(body)}")}
+
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :error, "Create list error: #{inspect(reason)}")}
+    end
   end
 
   @impl true
