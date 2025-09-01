@@ -8,6 +8,7 @@ defmodule GiolotrelloClientWeb.TaskModalComponent do
       |> assign_new(:creating_task, fn -> false end)
       |> assign_new(:editing_task, fn -> false end)
       |> assign_new(:comments, fn -> [] end)
+      |> assign_new(:users, fn -> [] end)
       |> assign(assigns)
 
     {:ok, socket}
@@ -46,6 +47,17 @@ defmodule GiolotrelloClientWeb.TaskModalComponent do
                 <input type="hidden" name="task_id" value={@task["id"]} />
                 <input type="text" name="title" value={@task["title"]} class="border rounded p-1 w-full mb-2" />
                 <textarea name="description" class="border rounded p-1 w-full mb-2"><%= @task["description"] %></textarea>
+                <div class="mb-2">
+                <label for="assignee_id" class="block text-sm font-medium text-gray-700">Assigned User</label>
+                <select name="assignee_id" id="assignee_id" class="border rounded p-1 w-full">
+                  <option value="">Unassigned</option>
+                  <%= for user <- @users do %>
+                    <option value={user["id"]} selected={@task["assignee_id"] == user["id"]}>
+                      <%= user["email"] %>
+                    </option>
+                  <% end %>
+                </select>
+              </div>
 
                 <div class="flex space-x-2">
                   <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save</button>
@@ -57,6 +69,14 @@ defmodule GiolotrelloClientWeb.TaskModalComponent do
               <!-- Show task -->
               <h2 class="text-xl font-bold mb-4"><%= @task["title"] %></h2>
               <p class="text-gray-700 mb-4"><%= @task["description"] %></p>
+              <div class="mb-4">
+                <span class="font-semibold">Assigned to:</span>
+                <%= case Enum.find(@users, &(&1["id"] == @task["assignee_id"])) do %>
+                  <% nil -> %><em>Unassigned</em>
+                  <% user -> %><%= user["email"] %>
+                <% end %>
+              </div>
+
               <div class="flex space-x-2">
                 <button
                   class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"

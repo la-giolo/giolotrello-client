@@ -35,16 +35,22 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
     {:noreply, assign(socket, :creating_list, false)}
   end
 
-
   @impl true
-  def handle_event("show_task", %{"id" => id}, socket) do
-    task =
-      socket.assigns.lists
-      |> Enum.flat_map(& &1["tasks"])
-      |> Enum.find(fn t -> to_string(t["id"]) == id end)
+def handle_event("show_task", %{"id" => id}, socket) do
+  list =
+    Enum.find(socket.assigns.lists, fn l ->
+      Enum.any?(l["tasks"], fn t -> to_string(t["id"]) == id end)
+    end)
 
-    {:noreply, assign(socket, :selected_task, task)}
-  end
+  task =
+    list["tasks"]
+    |> Enum.find(fn t -> to_string(t["id"]) == id end)
+
+  {:noreply,
+   socket
+   |> assign(:selected_task, task)
+   |> assign(:selected_task_users, list["users"])}
+end
 
   @impl true
   def handle_event("close_task", _params, socket) do
@@ -141,14 +147,15 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
   end
 
   @impl true
-  def handle_event("update_task", %{"task_id" => task_id, "title" => title, "description" => desc}, socket) do
+  def handle_event("update_task", %{"task_id" => task_id, "title" => title, "description" => desc, "assignee_id" => assignee_id}, socket) do
     token = socket.assigns[:auth_token]
 
     case Req.put("http://giolotrello-api:4000/api/tasks/#{task_id}",
           json: %{
             "task" => %{
               "title" => title,
-              "description" => desc
+              "description" => desc,
+              "assignee_id" => (if assignee_id == "", do: nil, else: String.to_integer(assignee_id))
             }
           },
           headers: [{"authorization", "Bearer " <> token}]
