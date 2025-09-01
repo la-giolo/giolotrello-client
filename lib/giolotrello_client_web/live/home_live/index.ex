@@ -19,10 +19,22 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
       |> assign(:selected_task, nil)
       |> assign(:creating_task, false)
       |> assign(:editing_task, false)
+      |> assign(:creating_list, false)
       |> assign(:auth_token, token)
 
     {:ok, socket}
   end
+
+  @impl true
+  def handle_event("new_list", _params, socket) do
+    {:noreply, assign(socket, :creating_list, true)}
+  end
+
+  @impl true
+  def handle_event("cancel_create_list", _params, socket) do
+    {:noreply, assign(socket, :creating_list, false)}
+  end
+
 
   @impl true
   def handle_event("show_task", %{"id" => id}, socket) do
@@ -53,7 +65,7 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
   end
 
   @impl true
-  def handle_event("cancel_create", _params, socket) do
+  def handle_event("cancel_create_task", _params, socket) do
     {:noreply, assign(socket, :creating_task, false)}
   end
 

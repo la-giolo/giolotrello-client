@@ -11,6 +11,18 @@
     <%= for list <- @lists do %>
       <.task_list list={list} />
     <% end %>
+    <div class="bg-gray-100 rounded-lg p-4 w-64 shadow max-h-min">
+      <%= case @creating_list do %>
+        <% true -> %>
+          <%!-- TODO: ADD LIST FORM HERE --%>
+        <% false -> %>
+          <button
+            class="text-blue-600 hover:underline text-sm"
+          >
+            + New List
+          </button>
+      <% end %>
+    </div>
   </div>
 
   <%= if @selected_task do %>

@@ -17,10 +17,8 @@ defmodule GiolotrelloClientWeb.TaskModalComponent do
   def render(assigns) do
     ~H"""
     <div class="fixed inset-0 z-50 flex items-center justify-center">
-      <!-- Backdrop -->
       <div class="absolute inset-0 bg-black/50" phx-click="close_task"></div>
 
-      <!-- Modal content -->
       <div class="relative bg-white rounded-lg shadow-lg p-6 w-[700px] flex">
         <!-- Left side: task details -->
         <div class="flex-1 pr-6">
@@ -39,7 +37,7 @@ defmodule GiolotrelloClientWeb.TaskModalComponent do
                 <input type="text" name="title" placeholder="Task title" />
                 <textarea name="description" placeholder="Description"></textarea>
                 <button type="submit">Save</button>
-                <button type="button" phx-click="cancel_create">Cancel</button>
+                <button type="button" phx-click="cancel_create_task">Cancel</button>
               </form>
 
             <% {_, true} -> %>
