@@ -97,32 +97,33 @@ defmodule GiolotrelloClientWeb.TaskModalComponent do
         </div>
 
         <!-- Right side: comments -->
-        <div class="w-64 border-l pl-4 flex flex-col">
-          <h3 class="font-semibold mb-2">Comments</h3>
+        <%= unless @creating_task do %>
+          <div class="w-64 border-l pl-4 flex flex-col">
+            <h3 class="font-semibold mb-2">Comments</h3>
 
-          <div class="flex-1 overflow-y-auto space-y-2">
-            <%= for comment <- @task["comments"] || [] do %>
-              <div class="border rounded p-2 text-sm bg-gray-50">
-                <p><%= comment["body"] %></p>
-              </div>
-            <% end %>
+            <div class="flex-1 overflow-y-auto space-y-2">
+              <%= for comment <- @task["comments"] || [] do %>
+                <div class="border rounded p-2 text-sm bg-gray-50">
+                  <p><%= comment["body"] %></p>
+                </div>
+              <% end %>
+            </div>
+
+            <form phx-submit="add_comment" class="flex flex-col space-y-2">
+              <input type="hidden" name="task_id" value={@task["id"]} />
+              <textarea
+                name="body"
+                placeholder="Write a comment..."
+                class="border rounded p-2 w-full resize-none"
+              ></textarea>
+              <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 self-end">
+                Add Comment
+              </button>
+            </form>
           </div>
-
-          <form phx-submit="add_comment" class="flex flex-col space-y-2">
-            <input type="hidden" name="task_id" value={@task["id"]} />
-            <textarea
-              name="body"
-              placeholder="Write a comment..."
-              class="border rounded p-2 w-full resize-none"
-            ></textarea>
-            <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 self-end">
-              Add Comment
-            </button>
-          </form>
-        </div>
+        <%= end %>
       </div>
     </div>
     """
   end
-
 end

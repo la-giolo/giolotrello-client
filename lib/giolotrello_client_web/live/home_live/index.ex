@@ -64,25 +64,54 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
   end
 
   @impl true
-def handle_event("show_task", %{"id" => id}, socket) do
-  list =
-    Enum.find(socket.assigns.lists, fn l ->
-      Enum.any?(l["tasks"], fn t -> to_string(t["id"]) == id end)
-    end)
+  def handle_event("delete_list", %{"id" => id}, socket) do
+    token = socket.assigns[:auth_token]
 
-  task =
-    list["tasks"]
-    |> Enum.find(fn t -> to_string(t["id"]) == id end)
+    case Req.delete("http://giolotrello-api:4000/api/lists/#{id}",
+          headers: [{"authorization", "Bearer " <> token}]
+        ) do
+      {:ok, %{status: 204}} ->
+        {:noreply,
+        socket
+        |> update(:lists, fn lists ->
+          Enum.reject(lists, fn list ->
+            to_string(list["id"]) == id
+          end)
+        end)
+        |> put_flash(:info, "List deleted successfully")}
 
-  {:noreply,
-   socket
-   |> assign(:selected_task, task)
-   |> assign(:selected_task_users, list["users"])}
-end
+      {:ok, %{status: status, body: body}} ->
+        {:noreply, put_flash(socket, :error, "Delete failed (#{status}): #{inspect(body)}")}
+
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :error, "Delete list error: #{inspect(reason)}")}
+    end
+  end
+
+  @impl true
+  def handle_event("show_task", %{"id" => id}, socket) do
+    list =
+      Enum.find(socket.assigns.lists, fn l ->
+        Enum.any?(l["tasks"], fn t -> to_string(t["id"]) == id end)
+      end)
+
+    task =
+      list["tasks"]
+      |> Enum.find(fn t -> to_string(t["id"]) == id end)
+
+    {:noreply,
+    socket
+    |> assign(:selected_task, task)
+    |> assign(:selected_task_users, list["users"])}
+  end
 
   @impl true
   def handle_event("close_task", _params, socket) do
-    {:noreply, assign(socket, :selected_task, nil)}
+    {:noreply,
+    socket
+    |> assign(:creating_task, false)
+    |> assign(:editing_task, false)
+    |> assign(:selected_task, nil)}
   end
 
   def handle_event("new_task", %{"list_id" => list_id}, socket) do
@@ -100,7 +129,10 @@ end
 
   @impl true
   def handle_event("cancel_create_task", _params, socket) do
-    {:noreply, assign(socket, :creating_task, false)}
+    {:noreply,
+    socket
+    |> assign(:creating_task, false)
+    |> assign(:selected_task, nil)}
   end
 
   @impl true
@@ -171,7 +203,10 @@ end
 
   @impl true
   def handle_event("cancel_edit", _params, socket) do
-    {:noreply, assign(socket, :editing_task, false)}
+    {:noreply,
+    socket
+    |> assign(:editing_task, false)
+    |> assign(:selected_task, nil)}
   end
 
   @impl true
