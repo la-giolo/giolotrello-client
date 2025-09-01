@@ -121,7 +121,7 @@ defmodule GiolotrelloClientWeb.TaskModalComponent do
               </button>
             </form>
           </div>
-        <%= end %>
+        <% end %>
       </div>
     </div>
     """

@@ -250,13 +250,18 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
   end
 
   @impl true
-  def handle_event("reorder_task", %{"task_id" => task_id, "after_task_id" => after_task_id}, socket) do
+  def handle_event("reorder_task", %{
+    "task_id" => task_id,
+    "after_task_id" => after_task_id,
+    "list_id" => list_id
+  }, socket) do
     token = socket.assigns[:auth_token]
 
     case Req.put("http://giolotrello-api:4000/api/tasks/#{task_id}",
           json: %{
             "task" => %{
-              "after_task_id" => after_task_id
+              "after_task_id" => after_task_id,
+              "list_id" => list_id
             }
           },
           headers: [{"authorization", "Bearer " <> token}]

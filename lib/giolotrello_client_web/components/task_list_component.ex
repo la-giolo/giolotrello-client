@@ -17,7 +17,12 @@ defmodule GiolotrelloClientWeb.TaskListComponent do
         </button>
       </div>
 
-      <ul class="space-y-2" id="task" phx-hook="SortableTasks">
+      <ul
+        class="space-y-2"
+        id="task"
+        phx-hook="SortableTasks"
+        data-list-id={@list["id"]}
+      >
         <%= for task <- @list["tasks"] do %>
           <.task_card task={task} />
         <% end %>
