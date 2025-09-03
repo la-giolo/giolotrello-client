@@ -72,7 +72,7 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
         end)
         |> put_flash(:info, "List deleted successfully")}
 
-      {:ok, %{status: status, body: body}} ->
+      {:ok, %Tesla.Env{status: status, body: body}} ->
         {:noreply, put_flash(socket, :error, "Delete failed (#{status}): #{inspect(body)}")}
 
       {:error, reason} ->
@@ -128,27 +128,17 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
   end
 
   @impl true
-  def handle_event("create_task", %{"title" => title, "description" => description, "list_id" => list_id}, socket) do
+  def handle_event("create_task", %{"title" => title, "description" => description, "list_id" => list_id} = params, socket) do
     token = socket.assigns[:auth_token]
 
-    case Req.post("http://giolotrello-api:4000/api/tasks",
-          json: %{
-            "task" => %{
-              "title" => title,
-              "description" => description,
-              "list_id" => list_id
-            }
-
-          },
-          headers: [{"authorization", "Bearer " <> token}]
-        ) do
-      {:ok, %{status: 201, body: task}} ->
+    case GiolotrelloClient.API.Tasks.create_task(params, token) do
+      {:ok, %Tesla.Env{status: 201, body: task}} ->
         {:noreply,
         socket
         |> assign(:tasks, [task | socket.assigns.tasks])
         |> assign(:creating_task, false)}
 
-      {:ok, %{status: status, body: body}} ->
+      {:ok, %Tesla.Env{status: status, body: body}} ->
         {:noreply, put_flash(socket, :error, "Create failed (#{status}): #{inspect(body)}")}
 
       {:error, reason} ->
@@ -161,10 +151,8 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
   def handle_event("delete_task", %{"id" => id}, socket) do
     token = socket.assigns[:auth_token]
 
-    case Req.delete("http://giolotrello-api:4000/api/tasks/#{id}",
-          headers: [{"authorization", "Bearer " <> token}]
-        ) do
-      {:ok, %Req.Response{status: 204}} ->
+    case GiolotrelloClient.API.Tasks.delete_task(id, token) do
+      {:ok, %Tesla.Env{status: 204}} ->
         updated_lists = Enum.map(socket.assigns.lists, fn list ->
           tasks = Enum.reject(list["tasks"], fn t -> Integer.to_string(t["id"]) == id end)
           Map.put(list, "tasks", tasks)
@@ -175,7 +163,7 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
         |> assign(:lists, updated_lists)
         |> assign(:selected_task, nil)}
 
-      {:ok, %Req.Response{status: status, body: body}} ->
+      {:ok, %Tesla.Env{status: status, body: body}} ->
         {:noreply, put_flash(socket, :error, "Delete failed (#{status}): #{inspect(body)}")}
 
       {:error, reason} ->
@@ -202,20 +190,20 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
   end
 
   @impl true
-  def handle_event("update_task", %{"task_id" => task_id, "title" => title, "description" => desc, "assignee_id" => assignee_id}, socket) do
+  def handle_event(
+    "update_task",
+    %{
+      "task_id" => task_id,
+      "title" => title,
+      "description" => desc,
+      "assignee_id" => assignee_id
+    } = params,
+    socket
+  ) do
     token = socket.assigns[:auth_token]
 
-    case Req.put("http://giolotrello-api:4000/api/tasks/#{task_id}",
-          json: %{
-            "task" => %{
-              "title" => title,
-              "description" => desc,
-              "assignee_id" => (if assignee_id == "", do: nil, else: String.to_integer(assignee_id))
-            }
-          },
-          headers: [{"authorization", "Bearer " <> token}]
-        ) do
-      {:ok, %Req.Response{status: 200, body: updated_task}} ->
+    case GiolotrelloClient.API.Tasks.update_task(task_id, params, token) do
+      {:ok, %Tesla.Env{status: 200, body: updated_task}} ->
         updated_lists =
           Enum.map(socket.assigns.lists, fn list ->
             if list["id"] == updated_task["list_id"] do
@@ -233,7 +221,7 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
         |> assign(:selected_task, nil)
         |> assign(:editing_task, false)}
 
-      {:ok, %Req.Response{status: status, body: body}} ->
+      {:ok, %Tesla.Env{status: status, body: body}} ->
         {:noreply, put_flash(socket, :error, "Update failed (#{status}): #{inspect(body)}")}
 
       {:error, reason} ->
@@ -242,23 +230,19 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
   end
 
   @impl true
-  def handle_event("reorder_task", %{
-    "task_id" => task_id,
-    "after_task_id" => after_task_id,
-    "list_id" => list_id
-  }, socket) do
+  def handle_event(
+    "reorder_task",
+    %{
+      "task_id" => task_id,
+      "after_task_id" => after_task_id,
+      "list_id" => list_id
+    } = params,
+    socket
+  ) do
     token = socket.assigns[:auth_token]
 
-    case Req.put("http://giolotrello-api:4000/api/tasks/#{task_id}",
-          json: %{
-            "task" => %{
-              "after_task_id" => after_task_id,
-              "list_id" => list_id
-            }
-          },
-          headers: [{"authorization", "Bearer " <> token}]
-        ) do
-      {:ok, %Req.Response{status: 200, body: updated_task}} ->
+    case GiolotrelloClient.API.Tasks.reorder_task(task_id, params, token) do
+      {:ok, %Tesla.Env{status: 200, body: updated_task}} ->
         updated_lists =
           Enum.map(socket.assigns.lists, fn list ->
             if list["id"] == updated_task["list_id"] do
@@ -276,7 +260,7 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
         socket
         |> assign(:lists, updated_lists)}
 
-      {:ok, %Req.Response{status: status, body: body}} ->
+      {:ok, %Tesla.Env{status: status, body: body}} ->
         {:noreply, put_flash(socket, :error, "Reorder failed (#{status}): #{inspect(body)}")}
 
       {:error, reason} ->
