@@ -1,9 +1,9 @@
-defmodule GiolotrelloClientWeb.TaskListComponent do
-  use GiolotrelloClientWeb, :component
+defmodule GiolotrelloClientWeb.ListComponent do
+  use GiolotrelloClientWeb, :live_component
 
   import GiolotrelloClientWeb.TaskCardComponent
 
-  def task_list(assigns) do
+  def render(assigns) do
     ~H"""
     <div class="bg-gray-100 rounded-lg p-4 w-64 shadow">
       <div class="flex justify-between items-center mb-2">

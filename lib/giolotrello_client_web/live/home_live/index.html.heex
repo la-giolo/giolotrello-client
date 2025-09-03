@@ -9,7 +9,11 @@
 
   <div class="flex space-x-4 overflow-x-auto px-4">
     <%= for list <- @lists do %>
-      <.task_list list={list} />
+      <.live_component
+        module={GiolotrelloClientWeb.ListComponent}
+        id={"list-#{list["id"]}"}
+        list={list}
+      />
     <% end %>
     <div class="bg-gray-100 rounded-lg p-4 w-64 shadow max-h-min">
       <%= case @creating_list do %>
