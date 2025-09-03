@@ -2,6 +2,12 @@ defmodule GiolotrelloClient.API.Lists do
   alias GiolotrelloClient.API.Client
   alias GiolotrelloClient.Helpers.ApiHelper
 
+  def get_all_lists(token) do
+    headers = ApiHelper.bearer(token)
+
+    Client.get("/lists", headers: headers)
+  end
+
   def create_list(title, token) do
     headers = ApiHelper.bearer(token)
     body = %{list: %{title: title}}

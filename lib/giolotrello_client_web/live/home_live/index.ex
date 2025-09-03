@@ -273,11 +273,8 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
     token = socket.assigns[:auth_token]
     task_id_int = String.to_integer(task_id)
 
-    case Req.post("http://giolotrello-api:4000/api/tasks/#{task_id}/comments",
-          json: %{"comment" => %{"body" => body}},
-          headers: [{"authorization", "Bearer " <> token}]
-        ) do
-      {:ok, %Req.Response{status: 201, body: %{"data" => new_comment}}} ->
+    case GiolotrelloClient.API.Comments.create_comment(task_id, body, token) do
+      {:ok, %Tesla.Env{status: 201, body: %{"data" => new_comment}}} ->
         updated_lists =
           Enum.map(socket.assigns.lists, fn list ->
             updated_tasks =
@@ -304,7 +301,7 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
         |> assign(:lists, updated_lists)
         |> assign(:selected_task, updated_selected_task)}
 
-      {:ok, %Req.Response{status: status, body: body}} ->
+      {:ok, %Tesla.Env{status: status, body: body}} ->
         {:noreply, put_flash(socket, :error, "Add comment failed (#{status}): #{inspect(body)}")}
 
       {:error, reason} ->
@@ -315,13 +312,11 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
   defp fetch_lists(nil), do: {:error, :no_token}
 
   defp fetch_lists(token) do
-    case Req.get("http://giolotrello-api:4000/api/lists",
-           headers: [{"authorization", "Bearer " <> token}]
-         ) do
-      {:ok, %Req.Response{status: 200, body: %{"lists" => lists}}} ->
+    case GiolotrelloClient.API.Lists.get_all_lists(token) do
+      {:ok, %Tesla.Env{status: 200, body: %{"lists" => lists}}} ->
         {:ok, lists}
 
-      {:ok, %Req.Response{status: status}} ->
+      {:ok, %Tesla.Env{status: status}} ->
         {:error, status}
 
       {:error, reason} ->
