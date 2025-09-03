@@ -19,7 +19,7 @@ defmodule GiolotrelloClientWeb.TaskListComponent do
 
       <ul
         class="space-y-2"
-        id="task"
+        id={"tasks#{@list["id"]}"}
         phx-hook="SortableTasks"
         data-list-id={@list["id"]}
       >

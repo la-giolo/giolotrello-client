@@ -17,6 +17,7 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
       socket
       |> assign(:lists, lists)
       |> assign(:selected_task, nil)
+      |> assign(:selected_task_users, nil)
       |> assign(:creating_task, false)
       |> assign(:editing_task, false)
       |> assign(:creating_list, false)

@@ -51,15 +51,13 @@
     </div>
   </div>
 
-  <%= if @selected_task do %>
-    <.live_component
-      module={GiolotrelloClientWeb.TaskModalComponent}
-      id={@selected_task["id"]}
-      list_id={@selected_task["list_id"]}
-      task={@selected_task}
-      users={@selected_task_users}
-      creating_task={@creating_task || false}
-      editing_task={@editing_task || false}
-    />
-  <% end %>
+  <.live_component
+    module={GiolotrelloClientWeb.TaskModalComponent}
+    id="task-modal"
+    list_id={@selected_task && @selected_task["list_id"]}
+    task={@selected_task}
+    users={@selected_task_users}
+    creating_task={@creating_task || false}
+    editing_task={@editing_task || false}
+  />
 </div>
