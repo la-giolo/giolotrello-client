@@ -41,22 +41,15 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
   def handle_event("create_list", %{"title" => title}, socket) do
     token = socket.assigns[:auth_token]
 
-    case Req.post("http://giolotrello-api:4000/api/lists",
-          json: %{
-            "list" => %{
-              "title" => title
-            }
-          },
-          headers: [{"authorization", "Bearer " <> token}]
-        ) do
-      {:ok, %{status: 201, body: %{"data" => list}}} ->
+    case GiolotrelloClient.API.Lists.create_list(title, token) do
+      {:ok, %Tesla.Env{status: status, body: %{"data" => list}}} when status in [200, 201] ->
         {:noreply,
         socket
         |> update(:lists, fn lists -> lists ++ [list] end)
         |> assign(:creating_list, false)
         |> put_flash(:info, "List created successfully")}
 
-      {:ok, %{status: status, body: body}} ->
+      {:ok, %Tesla.Env{status: status, body: body}} ->
         {:noreply, put_flash(socket, :error, "Create failed (#{status}): #{inspect(body)}")}
 
       {:error, reason} ->
@@ -68,10 +61,8 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
   def handle_event("delete_list", %{"id" => id}, socket) do
     token = socket.assigns[:auth_token]
 
-    case Req.delete("http://giolotrello-api:4000/api/lists/#{id}",
-          headers: [{"authorization", "Bearer " <> token}]
-        ) do
-      {:ok, %{status: 204}} ->
+    case GiolotrelloClient.API.Lists.delete_list(id, token) do
+      {:ok, %Tesla.Env{status: 204}} ->
         {:noreply,
         socket
         |> update(:lists, fn lists ->

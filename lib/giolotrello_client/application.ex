@@ -14,7 +14,8 @@ defmodule GiolotrelloClient.Application do
       # Start a worker by calling: GiolotrelloClient.Worker.start_link(arg)
       # {GiolotrelloClient.Worker, arg},
       # Start to serve requests, typically the last entry
-      GiolotrelloClientWeb.Endpoint
+      GiolotrelloClientWeb.Endpoint,
+      {Finch, name: GiolotrelloClient.Finch}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
