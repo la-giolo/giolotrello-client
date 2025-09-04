@@ -1,7 +1,7 @@
 defmodule GiolotrelloClientWeb.ListComponent do
   use GiolotrelloClientWeb, :live_component
 
-  import GiolotrelloClientWeb.TaskCardComponent
+  alias GiolotrelloClientWeb.TaskComponent
 
   def render(assigns) do
     ~H"""
@@ -24,7 +24,11 @@ defmodule GiolotrelloClientWeb.ListComponent do
         data-list-id={@list["id"]}
       >
         <%= for task <- @list["tasks"] do %>
-          <.task_card task={task} />
+          <.live_component
+            module={TaskComponent}
+            id={"task-#{task["id"]}"}
+            task={task}
+          />
         <% end %>
       </ul>
 

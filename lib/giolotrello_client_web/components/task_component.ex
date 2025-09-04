@@ -1,4 +1,4 @@
-defmodule GiolotrelloClientWeb.TaskCardComponent do
+defmodule GiolotrelloClientWeb.TaskComponent do
   use GiolotrelloClientWeb, :live_component
 
   @impl true
