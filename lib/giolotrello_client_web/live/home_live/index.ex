@@ -80,6 +80,8 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
 
   @impl true
   def handle_event("show_task", %{"id" => id}, socket) do
+    token = socket.assigns[:auth_token]
+
     list =
       Enum.find(socket.assigns.lists, fn l ->
         Enum.any?(l["tasks"], fn t -> to_string(t["id"]) == id end)
@@ -89,10 +91,17 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
       list["tasks"]
       |> Enum.find(fn t -> to_string(t["id"]) == id end)
 
+    comments =
+      case GiolotrelloClient.API.Comments.get_comments(task["id"], token) do
+        {:ok, %Tesla.Env{status: 200, body: %{"data" => comments}}} -> comments
+        _ -> []
+      end
+
     {:noreply,
     socket
     |> assign(:selected_task, task)
-    |> assign(:selected_task_users, list["users"])}
+    |> assign(:selected_task_users, list["users"])
+    |> assign(:comments, comments)}
   end
 
   @impl true
@@ -273,31 +282,18 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
 
     case GiolotrelloClient.API.Comments.create_comment(task_id, body, token) do
       {:ok, %Tesla.Env{status: 201, body: %{"data" => new_comment}}} ->
-        updated_lists =
-          Enum.map(socket.assigns.lists, fn list ->
-            updated_tasks =
-              Enum.map(list["tasks"], fn task ->
-                if task["id"] == task_id_int do
-                  Map.update(task, "comments", [new_comment], fn comments -> comments ++ [new_comment] end)
-                else
-                  task
-                end
-              end)
+        updated_socket =
+          socket
+          |> assign(:comments, socket.assigns.comments ++ [new_comment])
 
-            Map.put(list, "tasks", updated_tasks)
-          end)
 
-        updated_selected_task =
-          if socket.assigns.selected_task && socket.assigns.selected_task["id"] == task_id_int do
-            Map.update(socket.assigns.selected_task, "comments", [new_comment], fn comments -> comments ++ [new_comment] end)
-          else
-            socket.assigns.selected_task
-          end
+        send_update(GiolotrelloClientWeb.CommentFormComponent, %{
+            id: "comment-form-#{task_id}",
+            task_id: task_id,
+            body: ""
+          })
 
-        {:noreply,
-        socket
-        |> assign(:lists, updated_lists)
-        |> assign(:selected_task, updated_selected_task)}
+        {:noreply, updated_socket}
 
       {:ok, %Tesla.Env{status: status, body: body}} ->
         {:noreply, put_flash(socket, :error, "Add comment failed (#{status}): #{inspect(body)}")}

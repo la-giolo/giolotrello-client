@@ -3,16 +3,25 @@ defmodule GiolotrelloClientWeb.CommentFormComponent do
 
   @impl true
   def update(assigns, socket) do
-    {:ok, assign(socket, assigns)}
+    socket =
+      socket
+      |> assign_new(:body, fn -> "" end)
+      |> assign(assigns)
+
+    {:ok, socket}
   end
+
 
   @impl true
   def render(assigns) do
     ~H"""
-    <form phx-submit="add_comment" phx-target={@myself} class="mt-3 flex space-x-2">
+    <form phx-submit="add_comment" class="mt-3 flex space-x-2">
+      <input type="hidden" name="task_id" value={@task_id} />
+
       <input
         type="text"
-        name="content"
+        name="body"
+        value={@body}
         placeholder="Write a comment..."
         class="flex-grow px-2 py-1 border rounded text-sm"
       />
