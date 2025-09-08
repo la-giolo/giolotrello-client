@@ -39,6 +39,29 @@ defmodule GiolotrelloClientWeb.ListComponent do
       >
         + Add Task
       </button>
+
+      <div class="mt-3">
+        <form phx-submit="add_user_to_list">
+          <input type="hidden" name="list_id" value={@list["id"]} />
+
+          <select
+            name="user_id"
+            class="border rounded px-2 py-1 text-sm"
+          >
+            <option value="">-- Add User --</option>
+            <%= for user <- @all_users do %>
+              <option value={user["id"]}><%= user["email"] %></option>
+            <% end %>
+          </select>
+
+          <button
+            type="submit"
+            class="mt-2 w-full bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+          >
+            Add User
+          </button>
+        </form>
+      </div>
     </div>
     """
   end

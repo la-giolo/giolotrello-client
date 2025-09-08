@@ -11,9 +11,16 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
         {:error, _} -> []
       end
 
+    all_users =
+      case fetch_all_users(token) do
+        {:ok, all_users} -> all_users
+        {:error, _} -> []
+      end
+
     socket =
       socket
       |> assign(:lists, lists)
+      |> assign(:all_users, all_users)
       |> assign(:selected_task, nil)
       |> assign(:selected_task_users, nil)
       |> assign(:creating_task, false)
@@ -75,6 +82,22 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
 
       {:error, reason} ->
         {:noreply, put_flash(socket, :error, "Delete list error: #{inspect(reason)}")}
+    end
+  end
+
+  @impl true
+  def handle_event("add_user_to_list", %{"list_id" => list_id, "user_id" => user_id}, socket) do
+    token = socket.assigns[:auth_token]
+
+    case GiolotrelloClient.API.Lists.add_user_to_list(list_id, user_id, token) do
+      {:ok, %Tesla.Env{status: 201, body: body}} ->
+        {:noreply, put_flash(socket, :info, "User added to list!")}
+
+      {:ok, %Tesla.Env{status: status, body: body}} ->
+        {:noreply, put_flash(socket, :error, "Failed (#{status}): #{inspect(body)}")}
+
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :error, "Error: #{inspect(reason)}")}
     end
   end
 
@@ -309,6 +332,21 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
     case GiolotrelloClient.API.Lists.get_all_lists(token) do
       {:ok, %Tesla.Env{status: 200, body: %{"lists" => lists}}} ->
         {:ok, lists}
+
+      {:ok, %Tesla.Env{status: status}} ->
+        {:error, status}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp fetch_all_users(nil), do: {:error, :no_token}
+
+  defp fetch_all_users(token) do
+    case GiolotrelloClient.API.Users.get_users(token) do
+      {:ok, %Tesla.Env{status: 200, body: %{"users" => all_users}}} ->
+        {:ok, all_users}
 
       {:ok, %Tesla.Env{status: status}} ->
         {:error, status}

@@ -25,12 +25,42 @@
           setTheme(localStorage.getItem("phx:theme") || "system");
         }
         window.addEventListener("storage", (e) => e.key === "phx:theme" && setTheme(e.newValue || "system"));
-        
+
         window.addEventListener("phx:set-theme", (e) => setTheme(e.target.dataset.phxTheme));
       })();
     </script>
   </head>
-  <body>
-    {@inner_content}
-  </body>
+    <body>
+      <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+        <%= if live_flash(@flash, :info) do %>
+          <div class="bg-green-600 text-white px-4 py-2 rounded shadow-md flex items-center gap-2 max-w-md">
+            <span class="break-words"><%= live_flash(@flash, :info) %></span>
+            <button
+              type="button"
+              class="ml-2 text-white hover:text-gray-200"
+              phx-click="lv:clear-flash"
+              phx-value-key="info"
+            >
+              ✖
+            </button>
+          </div>
+        <% end %>
+
+        <%= if live_flash(@flash, :error) do %>
+          <div class="bg-red-600 text-white px-4 py-2 rounded shadow-md flex items-start gap-2 mt-2 max-w-md">
+            <span class="break-words max-w-sm max-h-100 overflow-hidden"><%= live_flash(@flash, :error) %></span>
+            <button
+              type="button"
+              class="ml-2 text-white hover:text-gray-200"
+              phx-click="lv:clear-flash"
+              phx-value-key="error"
+            >
+              ✖
+            </button>
+          </div>
+        <% end %>
+      </div>
+
+      {@inner_content}
+    </body>
 </html>

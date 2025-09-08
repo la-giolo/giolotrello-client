@@ -50,7 +50,8 @@ defmodule GiolotrelloClientWeb do
 
   def live_view do
     quote do
-      use Phoenix.LiveView
+      use Phoenix.LiveView,
+        layout: {GiolotrelloClientWeb.Layouts, :root}
 
       unquote(html_helpers())
     end

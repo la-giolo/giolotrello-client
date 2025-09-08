@@ -20,4 +20,12 @@ defmodule GiolotrelloClient.API.Lists do
 
     Client.delete("/lists/#{list_id}", headers: headers)
   end
+
+  def add_user_to_list(list_id, user_id, token) do
+    headers = ApiHelper.bearer(token)
+
+    body = %{ user_id: user_id }
+
+    Client.post("/lists/#{list_id}/users", body, headers: headers)
+  end
 end
