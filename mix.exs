@@ -64,7 +64,8 @@ defmodule GiolotrelloClient.MixProject do
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
       {:tesla, "~> 1.15"},
-      {:finch, "~> 0.20"}
+      {:finch, "~> 0.20"},
+      {:ecto, "~> 3.13"}
     ]
   end
 
