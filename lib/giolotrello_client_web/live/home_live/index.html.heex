@@ -1,5 +1,4 @@
 <div class="min-h-screen bg-blue-200">
-  <!-- Header -->
   <div class="flex justify-between items-center bg-blue-500 text-white px-4 py-2 rounded mb-6">
     <h1 class="text-3xl font-bold">Giolotrello</h1>
 
@@ -8,7 +7,6 @@
     </a>
   </div>
 
-  <!-- Lists Section -->
   <div class="flex space-x-4 overflow-x-auto px-4">
     <%= for list <- @lists do %>
       <.live_component
@@ -18,7 +16,6 @@
       />
     <% end %>
 
-    <!-- New List -->
     <div class="bg-gray-100 rounded-lg p-4 w-64 shadow max-h-min">
       <%= if @creating_list do %>
         <form phx-submit="create_list" class="space-y-2">
@@ -58,7 +55,6 @@
     </div>
   </div>
 
-  <!-- Task Modal (conditionally shows form/details) -->
   <%= if @creating_task or @editing_task or @selected_task do %>
     <.live_component
       module={GiolotrelloClientWeb.TaskModalComponent}

@@ -1,9 +1,9 @@
 <div class="flex items-center justify-center min-h-screen bg-blue-200">
   <div class="w-full max-w-sm bg-white p-10 rounded-3xl shadow-lg">
     <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">GioloTrello</h2>
-    <h3 class="text-2xl font-bold text-center mb-8 text-gray-800">Login</h3>
+    <h3 class="text-2xl font-bold text-center mb-8 text-gray-800">Sign Up</h3>
 
-    <.form :let={f} for={} action={~p"/login"} method="post" class="space-y-6">
+    <.form :let={f} for={%{}} as={:user} phx-submit="signup" class="space-y-6">
       <div>
         <label class="block text-base font-semibold mb-2 text-gray-700">Email</label>
         <.input
@@ -12,6 +12,9 @@
           required
           class="w-full p-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
+        <%= if @errors["email"] do %>
+          <p class="text-red-500 text-sm mt-1"><%= Enum.join(@errors["email"], ", ") %></p>
+        <% end %>
       </div>
 
       <div>
@@ -22,29 +25,51 @@
           required
           class="w-full p-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
+        <%= if @errors["password"] do %>
+          <p class="text-red-500 text-sm mt-1"><%= Enum.join(@errors["password"], ", ") %></p>
+        <% end %>
+      </div>
+
+      <div>
+        <label class="block text-base font-semibold mb-2 text-gray-700">Confirm Password</label>
+        <.input
+          field={f[:confirm_password]}
+          type="password"
+          required
+          class="w-full p-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <%= if @errors["confirm_password"] do %>
+          <p class="text-red-500 text-sm mt-1"><%= Enum.join(@errors["confirm_password"], ", ") %></p>
+        <% end %>
       </div>
 
       <div>
         <.button
           class="w-full bg-blue-500 text-white text-lg font-semibold py-3 rounded-lg hover:bg-blue-600 transition-colors duration-200"
         >
-          Login
+          Create Account
         </.button>
       </div>
     </.form>
 
     <div class="mt-4">
       <.link
-        navigate={~p"/signup"}
+        navigate={~p"/login"}
         class="block w-full text-center border border-blue-500 text-blue-500 text-lg font-semibold py-3 rounded-lg hover:bg-blue-50 transition-colors duration-200"
       >
-        Create an Account
+        Go Back
       </.link>
     </div>
 
-    <%= if @conn.assigns[:phoenix_flash]["error"] do %>
+    <%= if live_flash(@flash, :error) do %>
       <p class="text-red-500 text-sm mt-4 text-center">
-        <%= @conn.assigns.phoenix_flash["error"] %>
+        <%= live_flash(@flash, :error) %>
+      </p>
+    <% end %>
+
+    <%= if live_flash(@flash, :info) do %>
+      <p class="text-green-500 text-sm mt-4 text-center">
+        <%= live_flash(@flash, :info) %>
       </p>
     <% end %>
   </div>
