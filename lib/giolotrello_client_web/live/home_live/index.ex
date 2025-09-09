@@ -1,6 +1,8 @@
 defmodule GiolotrelloClientWeb.HomeLive.Index do
   use GiolotrelloClientWeb, :live_view
 
+  alias GiolotrelloClient.Comments.Comment
+
   @impl true
   def mount(_params, session, socket) do
     token = session["auth_token"]
@@ -116,7 +118,7 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
 
     comments =
       case GiolotrelloClient.API.Comments.get_comments(task["id"], token) do
-        {:ok, %Tesla.Env{status: 200, body: %{"data" => comments}}} -> comments
+        {:ok, comments} -> comments
         _ -> []
       end
 
@@ -322,26 +324,37 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
     token = socket.assigns[:auth_token]
     task_id_int = String.to_integer(task_id)
 
-    case GiolotrelloClient.API.Comments.create_comment(task_id, body, token) do
-      {:ok, %Tesla.Env{status: 201, body: %{"data" => new_comment}}} ->
-        updated_socket =
-          socket
-          |> assign(:comments, socket.assigns.comments ++ [new_comment])
+    changeset =
+      %Comment{}
+      |> Comment.changeset(%{
+        "id" => nil,
+        "body" => body,
+        "task_id" => task_id_int
+      })
 
+    if changeset.valid? do
+      case GiolotrelloClient.API.Comments.create_comment(task_id_int, body, token) do
+        {:ok, new_comment} ->
+          updated_socket =
+            socket
+            |> assign(:comments, socket.assigns.comments ++ [new_comment])
 
-        send_update(GiolotrelloClientWeb.CommentFormComponent, %{
+          send_update(GiolotrelloClientWeb.CommentFormComponent, %{
             id: "comment-form-#{task_id}",
             task_id: task_id,
             body: ""
           })
 
-        {:noreply, updated_socket}
+          {:noreply, updated_socket}
 
-      {:ok, %Tesla.Env{status: status, body: body}} ->
-        {:noreply, put_flash(socket, :error, "Add comment failed (#{status}): #{inspect(body)}")}
+        {:error, {:unexpected_response, status, body}} ->
+          {:noreply, put_flash(socket, :error, "Add comment failed (#{status}): #{inspect(body)}")}
 
-      {:error, reason} ->
-        {:noreply, put_flash(socket, :error, "Add comment error: #{inspect(reason)}")}
+        {:error, reason} ->
+          {:noreply, put_flash(socket, :error, "Add comment error: #{inspect(reason)}")}
+      end
+    else
+      {:noreply, put_flash(socket, :error, "Comment too long (max 10 chars).")}
     end
   end
 
