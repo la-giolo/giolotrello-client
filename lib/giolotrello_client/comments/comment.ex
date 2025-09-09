@@ -15,6 +15,6 @@ defmodule GiolotrelloClient.Comments.Comment do
     comment
     |> cast(attrs, [:id, :body, :email, :task_id, :user_id])
     |> validate_required([:body, :task_id])
-    |> validate_length(:body, max: 10)
+    |> validate_length(:body, max: 140)
   end
 end
