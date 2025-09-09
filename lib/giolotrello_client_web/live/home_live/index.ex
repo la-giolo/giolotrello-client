@@ -141,6 +141,7 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
     socket
     |> assign(:creating_task, true)
     |> assign(:editing_task, false)
+    |> assign(:comments, nil)
     |> assign(:selected_task, %{
           "id" => "new-#{list_id}",
           "list_id" => list_id,
@@ -158,24 +159,42 @@ defmodule GiolotrelloClientWeb.HomeLive.Index do
   end
 
   @impl true
-  def handle_event("create_task", %{"title" => title, "description" => description, "list_id" => list_id} = params, socket) do
+  def handle_event(
+        "create_task",
+        %{"title" => title, "description" => description, "list_id" => list_id} = params,
+        socket
+      ) do
     token = socket.assigns[:auth_token]
 
     case GiolotrelloClient.API.Tasks.create_task(params, token) do
       {:ok, %Tesla.Env{status: 201, body: task}} ->
-        {:noreply,
-        socket
-        |> assign(:tasks, [task | socket.assigns.tasks])
-        |> assign(:creating_task, false)}
+        updated_socket =
+          socket
+          |> update(:lists, fn lists ->
+            Enum.map(lists, fn list ->
+              if list["id"] == task["list_id"] do
+                Map.update(list, "tasks", [task], fn
+                  nil -> [task]
+                  tasks when is_list(tasks) -> tasks ++ [task]
+                end)
+              else
+                list
+              end
+            end)
+          end)
+          |> assign(:creating_task, false)
+          |> put_flash(:info, "Task created successfully!")
+
+        {:noreply, updated_socket}
 
       {:ok, %Tesla.Env{status: status, body: body}} ->
-        {:noreply, put_flash(socket, :error, "Create failed (#{status}): #{inspect(body)}")}
+        {:noreply,
+        put_flash(socket, :error, "Create failed (#{status}): #{inspect(body)}")}
 
       {:error, reason} ->
         {:noreply, put_flash(socket, :error, "Create task error: #{inspect(reason)}")}
     end
   end
-
 
   @impl true
   def handle_event("delete_task", %{"id" => id}, socket) do
